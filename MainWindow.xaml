@@ -1,0 +1,230 @@
+﻿<Window x:Class="MiNIPotter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MiNIPotter"
+        mc:Ignorable="d"
+       Title="MiNIPotter Library" Height="800" Width="1200"
+        MinHeight="600" MinWidth="1000" Icon="potter.png">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Colors/Colors.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <FontFamily x:Key="HarryPotterFont">HarryPotter-Regular.ttf#Harry Potter</FontFamily>
+
+            <converters:AverageBookRatingToStarsStringConverter x:Key="AverageBookRatingToStarsStringConverter"/>
+            <converters:ChapterRatingToStarsStringConverter x:Key="ChapterRatingToStarsStringConverter"/>
+            <converters:RatingToStarColorConverter x:Key="RatingToStarColorConverter"/>
+
+            <SolidColorBrush x:Key="PrimaryForegroundBrush" Color="{StaticResource PrimaryForegroundColor}"/>
+            <SolidColorBrush x:Key="SecondaryBackgroundBrush" Color="{StaticResource SecondaryBackgroundColor}"/>
+            <SolidColorBrush x:Key="SecondaryForegroundBrush" Color="{StaticResource SecondaryForegroundColor}"/>
+            <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+
+            <Style x:Key="StarTextBlock" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+                <Setter Property="Margin" Value="1,0"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Window.Background>
+        <StaticResource ResourceKey="PrimaryBackgroundBrush"/>
+    </Window.Background>
+    <Window.Foreground>
+        <StaticResource ResourceKey="PrimaryForegroundBrush"/>
+    </Window.Foreground>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="MiNIPotter Library"
+           FontSize="40"
+           FontWeight="Bold"
+           FontFamily="{StaticResource HarryPotterFont}"
+           HorizontalAlignment="Center"
+           VerticalAlignment="Top"
+           Foreground="{StaticResource PrimaryForegroundBrush}"
+           Margin="0,10,0,20"/>
+
+
+        <Button Grid.Row="1"
+                Content="🗲 Load Books"
+                Command="{Binding LoadBooksCommand}"
+                Background="{StaticResource SecondaryBackgroundBrush}"
+                Foreground="{StaticResource SecondaryForegroundBrush}" 
+                FontWeight="Bold" FontSize="16"
+                HorizontalAlignment="Center" Padding="20,5" Margin="0,0,0,10">
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+
+
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="{StaticResource SecondaryBackgroundBrush}" Margin="5">
+                <ListBox ItemsSource="{Binding Books}"
+                         SelectedItem="{Binding SelectedBook}"
+                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="5"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd"
+                                                BorderThickness="1"
+                                                Background="{TemplateBinding Background}"
+                                                Padding="{TemplateBinding Padding}"
+                                                SnapsToDevicePixels="true">
+                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="true">
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsSelected" Value="true"/>
+                                                    <Condition Property="Selector.IsSelectionActive" Value="false"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </MultiTrigger>
+                                            <Trigger Property="IsEnabled" Value="false">
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Source="{Binding Cover}" Stretch="Uniform" Height="150" VerticalAlignment="Top" Margin="0,0,10,0"/>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                    <TextBlock Text="{Binding Title}" TextWrapping="Wrap" FontWeight="Bold" FontSize="18" Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"/>
+                                    <TextBlock Text="{Binding Author}" FontSize="10" Margin="0,5,0,0" Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"/>
+                                    <Grid Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontSize="12" Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}">
+                                            <Run Text="{Binding Pages}"/>
+                                            <Run Text=" pages"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding ReleaseDate, StringFormat='d MMMM yyyy'}" FontSize="12" HorizontalAlignment="Right" Grid.Column="1" Foreground="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=Foreground}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <Grid Grid.Column="1" DataContext="{Binding SelectedBook}" Margin="5,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="2*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="0,5,5,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="10"
+                                  Background="{StaticResource SecondaryBackgroundBrush}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Dedication}" FontSize="14" FontStyle="Italic" FontWeight="DemiBold" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding Author}" FontSize="14" HorizontalAlignment="Right" Margin="0,0,0,15"/>
+                            <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontSize="14" FontStyle="Italic" Margin="0,0,0,15"/>
+
+                            <TextBlock Text="Average Rating:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding Chapters, Converter={StaticResource AverageBookRatingToStarsStringConverter}}"
+                                       Style="{StaticResource StarTextBlock}" FontSize="20"
+                                       Foreground="{StaticResource AccentBrush}"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Column="1" Margin="5,0,0,0" Background="{StaticResource SecondaryBackgroundBrush}">
+                        <Image Source="{Binding Cover}" Stretch="Uniform" Margin="10"/>
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,5,5,5">
+                    <Border Background="{StaticResource SecondaryBackgroundBrush}" Padding="10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Chapters" Foreground="{StaticResource PrimaryForegroundBrush}"
+                                       FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+                            <ListBox Grid.Row="1" ItemsSource="{Binding Chapters}"
+                                     Background="Transparent" BorderThickness="0"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Expander IsExpanded="False" Margin="0,5" Foreground="{StaticResource PrimaryForegroundBrush}">
+                                            <Expander.Header>
+                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="DemiBold"/>
+                                            </Expander.Header>
+                                            <StackPanel Margin="10,5,5,5">
+                                                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontSize="12" FontStyle="Italic" Margin="0,0,0,5"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="Rating: " FontSize="12" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding Rating, Converter={StaticResource ChapterRatingToStarsStringConverter}}"
+                                                               FontSize="16" Style="{StaticResource StarTextBlock}"
+                                                               Foreground="{Binding Rating, Converter={StaticResource RatingToStarColorConverter}}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Expander>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+            <Image Grid.Column="1" Source="{Binding SelectedBook.Cover}" Stretch="Uniform" Margin="10"/>
+        </Grid>
+    </Grid>
+</Window>
